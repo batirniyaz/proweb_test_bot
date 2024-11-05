@@ -8,7 +8,6 @@ from . import messages
 
 from .credentials import TOKEN, NGROK_URL
 
-
 API_TOKEN = TOKEN
 
 bot = telebot.TeleBot(API_TOKEN, threaded=False)
@@ -49,7 +48,6 @@ def api_bots(request: HttpRequest, token):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message: types.Message):
-
     markup = types.InlineKeyboardMarkup()
     support_btn = types.InlineKeyboardButton('Тех. поддержка', url='t.me/itsmylifestyle')
     coworking_btn = types.InlineKeyboardButton('Коворкинг', url='t.me/proweb_coworking')
@@ -63,8 +61,20 @@ def send_welcome(message: types.Message):
     markup.row(basic_btn, review_btn)
     markup.add(types.InlineKeyboardButton('Правила обучения', callback_data='licence'))
 
-    bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html')
+    box_markup = types.ReplyKeyboardMarkup()
+    back_btn = types.KeyboardButton('На главную')
+    lang_btn = types.KeyboardButton("O'zbek tili")
+    box_markup.row(back_btn, lang_btn)
+
+    bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
     bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+
+    bot.register_next_step_handler(message, on_click)
+
+
+def on_click(message):
+    if message.text == 'На главную':
+        bot.send_message(message.chat.id, messages.help_message)
 
 
 @bot.callback_query_handler(func=lambda callback: True)
@@ -82,20 +92,22 @@ def call_messages(callback: types.CallbackQuery):
     if callback.data == 'conkurs':
         bot.send_message(callback.message.chat.id, messages.conkurs_message, parse_mode='html')
     elif callback.data == 'basic_course':
-        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html', reply_markup=basic_course_markup)
+        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html',
+                         reply_markup=basic_course_markup)
     elif callback.data == 'review':
-        bot.send_message(callback.message.chat.id, messages.review_message, parse_mode='html', reply_markup=review_markup)
+        bot.send_message(callback.message.chat.id, messages.review_message, parse_mode='html',
+                         reply_markup=review_markup)
     elif callback.data == 'licence':
         bot.send_message(callback.message.chat.id, messages.licence_message, parse_mode='html')
 
 
-@bot.callback_query_handler(func=lambda callback: True)
 def callback_review(callback: types.CallbackQuery):
     print(f"{callback.data=}")
     if callback.data == 'complains_and_suggestions':
         bot.send_message(callback.message.chat.id, messages.complain_suggestion_message, parse_mode='html')
 
 
+# @bot.callback_query_handler(func=lambda callback: True)
 @bot.message_handler(commands=['help'])
 def send_help(message):
     bot.send_message(message.chat.id, messages.help_message, parse_mode='html')
@@ -104,6 +116,3 @@ def send_help(message):
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
     bot.reply_to(message, message.text)
-
-
-
