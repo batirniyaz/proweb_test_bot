@@ -43,7 +43,7 @@ def welcome_buttons():
 def send_welcome(message: types.Message):
     full_name = get_name(message)
 
-    users = BotUser.objects.get()
+
 
     markup, box_markup = welcome_buttons()
     bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
