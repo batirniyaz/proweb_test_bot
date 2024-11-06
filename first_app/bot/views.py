@@ -45,11 +45,13 @@ def api_bots(request: HttpRequest, token):
 
     return main_view(request)
 
+user_lang = {'ru'}
+
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message: types.Message):
     markup = types.InlineKeyboardMarkup()
-    support_btn = types.InlineKeyboardButton('Тех. поддержка', url='t.me/itsmylifestyle')
+    support_btn = types.InlineKeyboardButton('Тех. поддержка' if user_lang == 'ru' else 'Texnik Yordam', url='t.me/itsmylifestyle')
     coworking_btn = types.InlineKeyboardButton('Коворкинг', url='t.me/proweb_coworking')
     concurs_btn = types.InlineKeyboardButton('Конкурсы', callback_data='conkurs')
     webpage_btn = types.InlineKeyboardButton('Посетить сайт', url='https://www.proweb.uz')
@@ -75,6 +77,12 @@ def send_welcome(message: types.Message):
 def on_click(message):
     if message.text == 'На главную':
         bot.send_message(message.chat.id, messages.help_message)
+    elif message.text == "O'zbek tili":
+        user_lang[message.chat.id] = 'uz'
+        bot.send_message(message.chat.id, "Til o'zbekchaga ogirildi")
+    elif message.text == "Русский язык":
+        user_lang[message.chat.id] = 'ru'
+        bot.send_message(message.chat.id, "Язык изменен на русский")
 
 
 @bot.callback_query_handler(func=lambda callback: True)
@@ -90,10 +98,12 @@ def call_messages(callback: types.CallbackQuery):
     review_markup.row(rvw_btn, cmp_sggtn_btn)
 
     if callback.data == 'conkurs':
-        bot.send_message(callback.message.chat.id, messages.conkurs_message, parse_mode='html')
+        file = open('storage/conkurs.jpg', 'rb')
+        bot.send_photo(callback.message.chat.id, file, caption=messages.conkurs_message, parse_mode='html')
+        # bot.send_message(callback.message.chat.id, messages.conkurs_message, parse_mode='html')
     elif callback.data == 'basic_course':
-        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html',
-                         reply_markup=basic_course_markup)
+        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html')
+        bot.send_photo(callback.message.chat.id, open('storage/basic_course.jpg', 'rb'), reply_markup=basic_course_markup, caption_entities=messages.basic_course_message)
     elif callback.data == 'review':
         bot.send_message(callback.message.chat.id, messages.review_message, parse_mode='html',
                          reply_markup=review_markup)
