@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .handlers_admin import send_admin_conf
-from .models import BotUser
+from .models import BotUser, BotGroup
 
 
 # Register your models here.
@@ -22,4 +22,11 @@ class BotUserAdmin(admin.ModelAdmin):
     make_admin.short_description = 'Сделать админом'
 
 
+class BotGroups(admin.ModelAdmin):
+    list_display = ('chat_id', 'chat_link', 'course_name', 'group_language', 'group_graphic', 'group_time')
+    list_filter = ('course_name', 'group_language', 'group_graphic', 'group_time')
+    search_fields = ('chat_id', 'chat_link', 'course_name', 'group_language', 'group_graphic', 'group_time')
+
+
 admin.site.register(BotUser, BotUserAdmin)
+admin.site.register(BotGroup, BotGroups)
