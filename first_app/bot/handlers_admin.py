@@ -7,6 +7,15 @@ from .bot_instance import bot
 from .models import BotUser, BotGroup
 
 
+class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
+    key = 'is_admin'
+
+    @staticmethod
+    def check(message: telebot.types.Message):
+        user = BotUser.objects.get(chat_id=message.chat.id)
+        return True if user.role == 'admin' else False
+
+
 def send_admin_conf(chat_id):
     keyboard = types.InlineKeyboardMarkup()
     yes_btn = types.InlineKeyboardButton('Да', callback_data=f'conf_{chat_id}')
