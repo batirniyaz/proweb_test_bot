@@ -59,7 +59,7 @@ def welcome_buttons_uz():
     return markup, box_markup
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start'], chat_types=['private'])
 def send_welcome(message: types.Message):
     chat_id = message.chat.id
     full_name = get_name(message)
@@ -86,7 +86,7 @@ def send_welcome(message: types.Message):
     bot.register_next_step_handler(message, on_click)
 
 
-@bot.message_handler(commands=['help'])
+@bot.message_handler(commands=['help'], chat_types=['private'])
 def send_help(message):
     bot.send_message(message.chat.id, messages.help_message, parse_mode='html')
 
@@ -99,7 +99,7 @@ def getchatid(message: types.Message):
     bot.send_message(message.chat.id, '\n'.join([f'cid: {cid}', f'mid: {mid}', f'fid: {fid}']))
 
 
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(func=lambda message: True, chat_types=['private'])
 def on_click(message):
     markup, box_markup = welcome_buttons()
     markup_uz, box_markup_uz = welcome_buttons_uz()
@@ -167,7 +167,7 @@ def call_complains_and_suggestions(callback: types.CallbackQuery):
     bot.register_next_step_handler(callback.message, send_contact)
 
 
-@bot.message_handler(content_types=['contact', 'text'])
+@bot.message_handler(content_types=['contact'], chat_types=['private'])
 def send_contact(message):
     print(message)
 
