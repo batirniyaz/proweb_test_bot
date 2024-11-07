@@ -212,18 +212,18 @@ def call_complains_and_suggestions(callback: types.CallbackQuery):
 
 @bot.message_handler(content_types=['contact'], chat_types=['private'])
 def send_contact(message):
-    print(message)
+    user = BotUser.objects.get(chat_id=message.from_user.id)
 
-    markup, box_markup = welcome_buttons()
+    if message.from_user.id == message.contact.user_id:
+        user_phone_number = message.contact.phone_number
 
-    if message.content_type == 'contact':
-        if message.from_user.id == message.contact.user_id:
-            bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.contact.user_id}\n'
-                                                f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
-                                                f'Name: {message.contact.first_name}\n'
-                                                f'Phone Number: {message.contact.phone_number}')
+        if user.language == 'ru':
+            bot.send_message(message.chat.id, 'Теперь, напишите чтобы вы хотели предложить или на что жалуетесь?', timeout=10)
         else:
-            bot.send_message(message.from_user.id, 'Пожалуйста отправьте свой номер телефона')
+            bot.send_message(message.chat.id, 'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?', timeout=10)
+
+        bot.register_next_step_handler(message, send_complain_text, user_phone_number)
+
     else:
         bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
                                             f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
