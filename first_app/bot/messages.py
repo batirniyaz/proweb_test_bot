@@ -117,3 +117,27 @@ complain_suggestion_message = """
     
 Вы также можете "<b>Поделиться контактом</b>", наша администрация свяжется с вами лично и выслушает все ваши замечания.
     """
+
+welcome_message_uz = """
+
+PROWEB zamonaviy kasblar markaziga xush kelibsiz! 🤗
+"""
+
+help_message_uz = """
+
+Bu bot maxsus PROWEB markazi talabalari uchun yaratilgan.
+Bot imkoniyatlari:
+■ Matnli xabar yuboring - mashg'ulotingiz bilan bog'liq har qanday savolni bering va iloji boricha tezroq qayta aloqa oling.
+■Texnik yordam -texnik yordam bilan bog'laning va kompyuter texnologiyalari bilan bog'liq muammolarni hal qiling. Shuningdek, siz shaxsiy kompyuterni yig'ish bo'yicha maslahat va yordam oling.
+■ Kovorking - kovorking administratoriga murojaat qiling va tashrif buyurishga joyni bron qiling.
+Tanlovlar - har oylik tanlovlarda qatnashib, qimmatbaho sovrinlarni yutib oling.
+■Saytga tashrif buyuring - PROWEB markazining sahifasiga o'ting, u erda siz markaz va mavjud kurslar haqidagi barcha batafsil ma'lumotlarni topasiz.
+■ Kompyuter asoslari - kompyuter asoslari kursiga yozilish.
+Sharh qoldiring - PROWEB markazida
+mashg'ulotlardan yoqimli taassurotlar bilan bo'lishish imkoniyati. Agar qiyinchiliklarga duch kelsangiz, shikoyat yoki so'rov qoldirishingiz mumkin. Biz har bir fikr uchun minnatdormiz.
+O'qish qoidalari - PROWEB markazida o'qish qoidalari haqida batafsil ma'lumot.
+Bosh sahifaga - botning asosiy sahifasiga qaytish
+va imkoniyatlari haqida batafsil ma'lumot olish.
+■ O'zbek tili - tilni o'zbek tilidan rus tiliga o'tkazish.
+Kontakt bilan ulashing - agar sizning savolingiz shaxsiy xarakterga ega bo'lsa, o'z ma'lumotlaringizni qoldiring va markaz ma'muriyati imkon qadar tezroq siz bilan shaxsan bog'lanadi.
+"""
