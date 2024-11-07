@@ -225,11 +225,32 @@ def send_contact(message):
         bot.register_next_step_handler(message, send_complain_text, user_phone_number)
 
     else:
-        bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
-                                            f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
-                                            f'Name: {message.from_user.first_name}\n'
-                                            f'Message: {message.json["text"]}')
-    text = 'Мы приняли ваш текст и постараемся обработать поскорее'
-    phone = 'Мы приняли ваши данные и в скором времени свами свяжемся'
-    bot.send_message(message.from_user.id, f"Спасибо за обращение!, {text if message.content_type == 'text' else phone}", reply_markup=box_markup)
-    bot.send_message(message.from_user.id, messages.help_message, parse_mode='html', reply_markup=markup)
+        bot.send_message(message.from_user.id, 'Пожалуйста отправьте <b>СВОЙ</b> номер телефона', parse_mode='html')
+
+
+@bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
+def send_complain_text(message, user_phone):
+    user = BotUser.objects.get(chat_id=message.chat.id)
+
+    markup, box_markup = welcome_buttons()
+    markup_uz, box_markup_uz = welcome_buttons_uz()
+
+    bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
+                                        f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
+                                        f'Name: {message.from_user.first_name}\n'
+                                        f'Phone: {user_phone}\n'
+                                        f'Message: {message.text}')
+
+    if user.language == 'ru':
+        bot.send_message(message.from_user.id, f"Спасибо за обращение!, {messages.text if message.content_type == 'text' else messages.phone}", reply_markup=box_markup)
+        bot.send_message(message.from_user.id, messages.help_message, parse_mode='html', reply_markup=markup)
+    else:
+        bot.send_message(message.from_user.id,
+                         f"Murojaat qilganingiz uchun tashakkur!, {messages_uz.text if message.content_type == 'text' else messages_uz.phone}",
+                         reply_markup=box_markup_uz)
+        bot.send_message(message.from_user.id, messages_uz.help_message, parse_mode='html', reply_markup=markup_uz)
+
+
+@bot.message_handler(chat_types=['supergroup', 'group'], func=lambda message: True)
+def get_group(message: types.ChatMemberUpdated):
+    print(message.new_chat_member)
