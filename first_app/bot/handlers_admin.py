@@ -42,15 +42,13 @@ def admin_conf(callback: types.CallbackQuery):
         bot.send_message(chat_id, 'Вы отказались от админства')
 
 
-def admin_panel(message):
-    chat_id = message.chat.id
-    keyboard = types.InlineKeyboardMarkup()
-    users_btn = types.InlineKeyboardButton('Пользователи', callback_data='users')
-    groups_btn = types.InlineKeyboardButton('Группы', callback_data='groups')
+def admin_panel(message: types.Message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    users_btn = types.KeyboardButton('Отправить')
+    groups_btn = types.KeyboardButton('Переслать')
     keyboard.add(users_btn, groups_btn)
 
-    bot.send_message(chat_id, 'Админ панель', reply_markup=keyboard)
-
+    bot.send_message(message.chat.id, 'Админ панель', reply_markup=keyboard)
     bot.register_next_step_handler(message, on_click_admin)
 
 
