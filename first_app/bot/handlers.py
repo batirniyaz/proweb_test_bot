@@ -73,15 +73,18 @@ def send_welcome(message: types.Message):
             first_name=full_name['firstname'],
             last_name=full_name['lastname'],
         )
-
-    if user.language == 'ru':
-        markup, box_markup = welcome_buttons()
-        bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
-        bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+    print(user)
+    if user.role == 'normal':
+        if user.language == 'ru':
+            markup, box_markup = welcome_buttons()
+            bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
+            bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+        else:
+            markup, box_markup = welcome_buttons_uz()
+            bot.send_message(message.chat.id, messages_uz.welcome_message, parse_mode='html', reply_markup=box_markup)
+            bot.send_message(message.chat.id, messages_uz.help_message, parse_mode='html', reply_markup=markup)
     else:
-        markup, box_markup = welcome_buttons_uz()
-        bot.send_message(message.chat.id, messages.welcome_message_uz, parse_mode='html', reply_markup=box_markup)
-        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup)
+        admin_panel(message)
 
     bot.register_next_step_handler(message, on_click)
 
