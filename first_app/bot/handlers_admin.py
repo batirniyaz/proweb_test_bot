@@ -1,4 +1,5 @@
 from telebot import types
+import telebot
 
 from . import messages
 
