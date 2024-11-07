@@ -52,15 +52,40 @@ def admin_panel(message: types.Message):
     bot.register_next_step_handler(message, on_click_admin)
 
 
-@bot.message_handler(func=lambda message: True)
-def on_click_admin(message):
-    if message.text == 'Пользователи':
-        users = BotUser.objects.all()
-        for user in users:
-            bot.send_message(message.chat.id, user.username)
-    elif message.text == 'Группы':
-        groups = BotGroup.objects.all()
-        for group in groups:
-            bot.send_message(message.chat.id, group.chat_link or group.chat_name)
+@bot.message_handler(is_admin=True, func=lambda message: message.text == 'Отправить' or message.text == 'Переслать')
+def on_click_admin(message: types.Message):
+    print(message.text)
+
+    if message.text == 'Отправить':
+        course_lang(message)
+    elif message.text == 'Переслать':
+        course_lang(message)
     else:
-        admin_panel(message.chat.id)
+        admin_panel(message)
+
+
+def course_lang(message: types.Message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    course_btn = types.KeyboardButton('Курс')
+    language_btn = types.KeyboardButton('Язык')
+    keyboard.row(course_btn, language_btn)
+
+    bot.send_message(message.chat.id, ' По чему фильтруем?', reply_markup=keyboard)
+    bot.register_next_step_handler(message, on_click_course_lang)
+
+
+@bot.message_handler(is_admin=True, func=lambda message: message.text == 'Курс' or message.text == 'Язык')
+def on_click_course_lang(message: types.Message):
+    groups = BotGroup.objects.all()
+    users = BotUser.objects.all()
+    if message.text == 'Курс':
+        for group in users:
+            bot.send_message(message.chat.id, group.first_name)
+    elif message.text == 'Язык':
+        for group in users:
+            bot.send_message(message.chat.id, group.last_name)
+    else:
+        course_lang(message)
+
+
+bot.add_custom_filter(IsAdmin())
