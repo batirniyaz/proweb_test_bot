@@ -3,18 +3,15 @@ from telebot import types
 from . import messages
 
 from .credentials import FEEDBACK_GROUP_ID
-from.bot_instance import bot
+from .bot_instance import bot
 from .models import BotUser, BotGroup
-
-
-user_lang = {}
 
 
 def get_name(message):
     first_name = f'{message.from_user.first_name}'
     last_name = f'{message.from_user.last_name if message.from_user.last_name else None}'
     username = f'{message.from_user.username if message.from_user.username else None}'
-    return {'firstname': first_name, 'lastname': last_name, 'username': username}
+    return {'firstname': first_name, 'lastname': last_name or '', 'username': username or ''}
 
 
 def welcome_buttons():
@@ -39,15 +36,51 @@ def welcome_buttons():
     return markup, box_markup
 
 
+def welcome_buttons_uz():
+    markup = types.InlineKeyboardMarkup()
+    support_btn = types.InlineKeyboardButton('Texnik yordam', url='t.me/itsmylifestyle')
+    coworking_btn = types.InlineKeyboardButton('Kovorking', url='t.me/proweb_coworking')
+    concurs_btn = types.InlineKeyboardButton('Tanlovlar 🎉', callback_data='conkurs')
+    webpage_btn = types.InlineKeyboardButton('Saytga tashrif buyurish', url='https://www.proweb.uz')
+    basic_btn = types.InlineKeyboardButton('Kompyuter asoslari', callback_data='basic_course')
+    review_btn = types.InlineKeyboardButton('Sharh qoldirish', callback_data='review')
+
+    markup.row(support_btn, coworking_btn)
+    markup.row(concurs_btn, webpage_btn)
+    markup.row(basic_btn, review_btn)
+    markup.add(types.InlineKeyboardButton('Oqish qoydalari', callback_data='licence'))
+
+    box_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    back_btn = types.KeyboardButton('Bosh sahifaga')
+    lang_btn = types.KeyboardButton("Русcкий язык 🇷🇺")
+    box_markup.row(back_btn, lang_btn)
+
+    return markup, box_markup
+
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message: types.Message):
+    chat_id = message.chat.id
     full_name = get_name(message)
 
+    user = BotUser.objects.filter(chat_id=chat_id).first()
 
+    if not user:
+        BotUser.objects.create(
+            chat_id=chat_id,
+            username=full_name['username'],
+            first_name=full_name['firstname'],
+            last_name=full_name['lastname'],
+        )
 
-    markup, box_markup = welcome_buttons()
-    bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
-    bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+    if user.language == 'ru':
+        markup, box_markup = welcome_buttons()
+        bot.send_message(message.chat.id, messages.welcome_message, parse_mode='html', reply_markup=box_markup)
+        bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+    else:
+        markup, box_markup = welcome_buttons_uz()
+        bot.send_message(message.chat.id, messages.welcome_message_uz, parse_mode='html', reply_markup=box_markup)
+        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup)
 
     bot.register_next_step_handler(message, on_click)
 
@@ -67,15 +100,24 @@ def getchatid(message: types.Message):
 
 @bot.message_handler(func=lambda message: True)
 def on_click(message):
-    markup, _ = welcome_buttons()
+    markup, box_markup = welcome_buttons()
+    markup_uz, box_markup_uz = welcome_buttons_uz()
+    user = BotUser.objects.get(chat_id=message.chat.id)
+
     if message.text == 'На главную':
         bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
+    elif message.text == 'Bosh sahifaga':
+        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup_uz)
     elif message.text == "O'zbek tili 🇺🇿":
-        user_lang[message.chat.id] = 'uz'
-        bot.send_message(message.chat.id, "Til o'zbekchaga ogirildi")
-    elif message.text == "Русккий язык 🇷🇺":
-        user_lang[message.chat.id] = 'ru'
-        bot.send_message(message.chat.id, "Язык изменен на русский")
+        user.language = 'uz'
+        user.save()
+        bot.send_message(message.chat.id, "Til o'zbekchaga ogirildi", reply_markup=markup_uz)
+        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup_uz)
+    elif message.text == "Русcкий язык 🇷🇺":
+        user.language = 'ru'
+        user.save()
+        bot.send_message(message.chat.id, "Язык изменен на русский", reply_markup=markup)
+        bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'conkurs')
