@@ -25,7 +25,8 @@ def send_admin_conf(chat_id):
     bot.send_message(chat_id, 'Vy gotovy stat\' adminom proweb bota?', reply_markup=keyboard)
 
 
-@bot.callback_query_handler(func=lambda callback: callback.data.startswith('conf_') or callback.data.startswith('deny_'))
+@bot.callback_query_handler(
+    func=lambda callback: callback.data.startswith('conf_') or callback.data.startswith('deny_'))
 def admin_conf(callback: types.CallbackQuery):
     chat_id = callback.message.chat.id
     user = BotUser.objects.get(chat_id=chat_id)
