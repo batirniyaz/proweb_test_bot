@@ -126,47 +126,87 @@ def on_click(message):
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'conkurs')
 def call_concurs(callback: types.CallbackQuery):
-    bot.send_message(callback.message.chat.id, messages.conkurs_message, parse_mode='html')
+    user = BotUser.objects.get(chat_id=callback.from_user.id)
+    if user.language == 'ru':
+        bot.send_message(callback.message.chat.id, messages.conkurs_message, parse_mode='html')
+    else:
+        bot.send_message(callback.message.chat.id, messages_uz.conkurs_message, parse_mode='html')
+
+    bot.answer_callback_query(callback_query_id=callback.id)
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'basic_course')
 def call_basic_course(callback: types.CallbackQuery):
+    user = BotUser.objects.get(chat_id=callback.from_user.id)
 
     basic_course_markup = types.InlineKeyboardMarkup()
-    bsc_btn = types.InlineKeyboardButton('Записаться на базовый курс', url='t.me/proweb_basics')
+    if user.language == 'ru':
+        bsc_btn = types.InlineKeyboardButton('Записаться на базовый курс', url='t.me/proweb_basics')
+        basic_course_markup.add(bsc_btn)
 
-    basic_course_markup.add(bsc_btn)
+        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html', reply_markup=basic_course_markup)
+    else:
+        bsc_btn = types.InlineKeyboardButton('Kompyuter asoslari kursiga yozilish', url='t.me/proweb_basics')
+        basic_course_markup.add(bsc_btn)
 
-    bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html')
-    bot.send_photo(callback.message.chat.id, open('storage/basic_course.jpg', 'rb'), reply_markup=basic_course_markup)
+        bot.send_message(callback.message.chat.id, messages_uz.basic_course_message, parse_mode='html',
+                         reply_markup=basic_course_markup)
+
+    bot.answer_callback_query(callback_query_id=callback.id)
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'review')
 def call_review(callback: types.CallbackQuery):
+    user = BotUser.objects.get(chat_id=callback.from_user.id)
 
     review_markup = types.InlineKeyboardMarkup()
-    rvw_btn = types.InlineKeyboardButton('Отзывы 😍', url='https://proweb.uz/reviews/')
-    cmp_sggtn_btn = types.InlineKeyboardButton('Жалобы и пожелания 😔', callback_data='complains_and_suggestions')
-    review_markup.row(rvw_btn, cmp_sggtn_btn)
+    if user.language == 'ru':
+        rvw_btn = types.InlineKeyboardButton('Отзывы 😍', url='https://proweb.uz/reviews/')
+        cmp_sggtn_btn = types.InlineKeyboardButton('Жалобы и пожелания 😔', callback_data='complains_and_suggestions')
+        review_markup.row(rvw_btn, cmp_sggtn_btn)
 
-    bot.send_message(callback.message.chat.id, messages.review_message, parse_mode='html',
-                     reply_markup=review_markup)
+        bot.send_message(callback.message.chat.id, messages.review_message, parse_mode='html',
+                         reply_markup=review_markup)
+    else:
+        rvw_btn = types.InlineKeyboardButton('Sharhlar 😍', url='https://proweb.uz/reviews/')
+        cmp_sggtn_btn = types.InlineKeyboardButton('Shikoyat va istaklar 😔', callback_data='complains_and_suggestions')
+        review_markup.row(rvw_btn, cmp_sggtn_btn)
+        bot.send_message(callback.message.chat.id, messages_uz.review_message, parse_mode='html',
+                         reply_markup=review_markup)
+
+    bot.answer_callback_query(callback_query_id=callback.id)
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'licence')
 def call_licence(callback: types.CallbackQuery):
-    bot.send_message(callback.message.chat.id, messages.licence_message, parse_mode='html')
+    user = BotUser.objects.get(chat_id=callback.from_user.id)
+    if user.language == 'ru':
+        bot.send_message(callback.message.chat.id, messages.licence_message, parse_mode='html', disable_web_page_preview=True)
+    else:
+        bot.send_message(callback.message.chat.id, messages_uz.licence_message, parse_mode='html', disable_web_page_preview=True)
+
+    bot.answer_callback_query(callback_query_id=callback.id)
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data == 'complains_and_suggestions')
 def call_complains_and_suggestions(callback: types.CallbackQuery):
+    user = BotUser.objects.get(chat_id=callback.from_user.id)
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    contact_btn = types.KeyboardButton('Поделиться контактом', request_contact=True)
-    keyboard.add(contact_btn)
+    if user.language == 'ru':
+        contact_btn = types.KeyboardButton('Поделиться контактом', request_contact=True)
+        keyboard.add(contact_btn)
 
-    bot.send_message(callback.message.chat.id, messages.complain_suggestion_message, parse_mode='html',
-                     reply_markup=keyboard)
+        bot.send_message(callback.message.chat.id, messages.complain_suggestion_message, parse_mode='html',
+                         reply_markup=keyboard)
+    else:
+        contact_btn = types.KeyboardButton('Kontakt bilan ulashing', request_contact=True)
+        keyboard.add(contact_btn)
+
+        bot.send_message(callback.message.chat.id, messages_uz.complain_suggestion_message, parse_mode='html',
+                         reply_markup=keyboard)
+
+    bot.answer_callback_query(callback_query_id=callback.id)
     bot.register_next_step_handler(callback.message, send_contact)
 
 
