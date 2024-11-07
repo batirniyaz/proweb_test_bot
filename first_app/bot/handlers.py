@@ -111,16 +111,16 @@ def on_click(message):
     if message.text == 'На главную':
         bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
     elif message.text == 'Bosh sahifaga':
-        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup_uz)
+        bot.send_message(message.chat.id, messages_uz.help_message, parse_mode='html', reply_markup=markup_uz)
     elif message.text == "O'zbek tili 🇺🇿":
         user.language = 'uz'
         user.save()
-        bot.send_message(message.chat.id, "Til o'zbekchaga ogirildi", reply_markup=markup_uz)
-        bot.send_message(message.chat.id, messages.help_message_uz, parse_mode='html', reply_markup=markup_uz)
+        bot.send_message(message.chat.id, "Til o'zbekchaga ogirildi", reply_markup=box_markup_uz)
+        bot.send_message(message.chat.id, messages_uz.help_message, parse_mode='html', reply_markup=markup_uz)
     elif message.text == "Русcкий язык 🇷🇺":
         user.language = 'ru'
         user.save()
-        bot.send_message(message.chat.id, "Язык изменен на русский", reply_markup=markup)
+        bot.send_message(message.chat.id, "Язык изменен на русский", reply_markup=box_markup)
         bot.send_message(message.chat.id, messages.help_message, parse_mode='html', reply_markup=markup)
 
 
