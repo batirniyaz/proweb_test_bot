@@ -1,8 +1,9 @@
 from telebot import types
 
-from . import messages
+from .handlers_admin import admin_panel
+from .messages import messages, messages_uz
 
-from .credentials import FEEDBACK_GROUP_ID
+from .credentials import FEEDBACK_GROUP_ID, BOT_ID
 from .bot_instance import bot
 from .models import BotUser, BotGroup
 
