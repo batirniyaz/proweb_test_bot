@@ -22,7 +22,7 @@ def send_admin_conf(chat_id):
     no_btn = types.InlineKeyboardButton('Нет', callback_data=f'deny_{chat_id}')
     keyboard.add(yes_btn, no_btn)
 
-    bot.send_message(chat_id, 'Vy gotovy stat\' adminom proweb bota?', reply_markup=keyboard)
+    bot.send_message(chat_id, 'Вы готовы стать админом ПРОВЕБ бота?', reply_markup=keyboard)
 
 
 @bot.callback_query_handler(
