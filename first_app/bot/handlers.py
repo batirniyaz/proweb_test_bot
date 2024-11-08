@@ -274,12 +274,6 @@ def send_complain_text(message, user_phone):
     markup, box_markup = welcome_buttons()
     markup_uz, box_markup_uz = welcome_buttons_uz()
 
-    bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
-                                        f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
-                                        f'Name: {message.from_user.first_name}\n'
-                                        f'Phone: {user_phone}\n'
-                                        f'Message: {message.text}')
-
     if user.language == 'ru':
         bot.send_message(message.from_user.id,
                          f"Спасибо за обращение!, {messages.text if message.content_type == 'text' else messages.phone}",
