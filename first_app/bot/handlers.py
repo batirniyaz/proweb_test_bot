@@ -294,17 +294,17 @@ def send_complain_text(message, user_phone):
 
 @bot.my_chat_member_handler()
 def get_new_group(message: types.ChatMemberUpdated):
+    chat_id = message.chat.id
+    chat_name = message.chat.title
+
     if message.new_chat_member.status == 'member':
-        chat_id = message.chat.id
-        chat_name = message.chat.title
-
-        if chat_name.startswith('PROWEB.'):
+        if type(chat_name) == str and chat_name.startswith('PROWEB.'):
+            chat_name = chat_name[7:]
             try:
-                _, course_name, language, graphic, group_time = chat_name.split(' ', 4)
-
+                course_name, language, graphic, group_time = chat_name.split(' ', 4)
                 if language not in ('УЗБ', 'РУС'):
                     raise ValueError("Неверный язык. Должно быть «УЗБ» или «РУС».")
-                if not graphic.isalpha() or '-' not in graphic:
+                if '-' not in graphic or not graphic.replace('-', '').isalpha():
                     raise ValueError("Недопустимая графика. Пример: «ПН-ЧТ».")
                 if not group_time.replace(':', '').isdigit():
                     raise ValueError("Неверное время. Пример: «17:00».")
@@ -316,13 +316,26 @@ def get_new_group(message: types.ChatMemberUpdated):
                         'course_name': course_name,
                         'group_language': language,
                         'group_graphic': graphic,
-                        'group_time': time,
+                        'group_time': group_time,
                     }
                 )
 
-                response = f"Группа {'добавлен' if created else 'обновлено'}: {chat_name}"
-                bot.send_message(chat_id, response)
-                print(response)
-
+                bot.send_message(chat_id, f"Группа {'добавлен' if created else 'обновлено'}: {chat_name}")
+                bot.send_message(message.from_user.id, f'Бот успешно добавил группу {chat_name} в БД')
             except ValueError as e:
                 bot.send_message(chat_id, f"Ошибка в структуре названия группы: {str(e)}")
+
+    if message.new_chat_member.status == 'left':
+        chat_id = message.chat.id
+
+        try:
+            group = BotGroup.objects.get(chat_id=chat_id)
+        except BotGroup.DoesNotExist:
+            return 'not match'
+        if group:
+            group.delete()
+            print("Delete")
+            bot.send_message(message.from_user.id, f'Бот был исключен из группы: {chat_name}. И я удалил его id {chat_id} из БД')
+        else:
+            print("no bot")
+
