@@ -9,5 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         bot.set_webhook(
-            WEBHOOK_URL
+            WEBHOOK_URL,
+            allowed_updates=['my_chat_member']
         )
+        print('webhook set successfully')
