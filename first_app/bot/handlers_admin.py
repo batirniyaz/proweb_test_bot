@@ -44,6 +44,11 @@ def admin_conf(callback: types.CallbackQuery):
     bot.answer_callback_query(callback_query_id=callback.id)
 
 
+@bot.message_handler(commands=['start'], chat_types=['private'], is_admin=True)
+def start(message: types.Message):
+    admin_panel(message)
+
+
 def admin_panel(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     users_btn = types.KeyboardButton('Отправить')
