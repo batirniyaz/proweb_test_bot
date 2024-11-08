@@ -35,11 +35,13 @@ def admin_conf(callback: types.CallbackQuery):
         user.role = 'admin'
         user.save()
         bot.send_message(chat_id, 'Теперь вы администратор бота')
-        admin_panel(chat_id)
+        admin_panel(callback.message)
     else:
         user.role = 'normal'
         user.save()
         bot.send_message(chat_id, 'Вы отказались от админства')
+
+    bot.answer_callback_query(callback_query_id=callback.id)
 
 
 def admin_panel(message: types.Message):
