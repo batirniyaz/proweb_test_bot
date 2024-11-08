@@ -1,3 +1,6 @@
+import threading
+import time
+
 from telebot import types
 
 from .handlers_admin import admin_panel
@@ -6,6 +9,8 @@ from .messages import messages, messages_uz
 from .credentials import FEEDBACK_GROUP_ID, BOT_ID
 from .bot_instance import bot
 from .models import BotUser, BotGroup
+
+user_time = {}
 
 
 def get_name(message):
@@ -73,7 +78,8 @@ def send_welcome(message: types.Message):
             first_name=full_name['firstname'],
             last_name=full_name['lastname'],
         )
-    print(user)
+        user = BotUser.objects.get(chat_id=chat_id)
+
     if user.role == 'normal':
         if user.language == 'ru':
             markup, box_markup = welcome_buttons()
@@ -216,11 +222,12 @@ def send_contact(message):
 
     if message.from_user.id == message.contact.user_id:
         user_phone_number = message.contact.phone_number
+        user_time[message.chat.id] = {'time': time.time()}
 
         if user.language == 'ru':
-            bot.send_message(message.chat.id, 'Теперь, напишите чтобы вы хотели предложить или на что жалуетесь?', timeout=10)
+            bot.send_message(message.chat.id, 'Теперь, напишите чтобы вы хотели предложить или на что жалуетесь?')
         else:
-            bot.send_message(message.chat.id, 'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?', timeout=10)
+            bot.send_message(message.chat.id, 'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?')
 
         bot.register_next_step_handler(message, send_complain_text, user_phone_number)
 
@@ -231,6 +238,17 @@ def send_contact(message):
 @bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
 def send_complain_text(message, user_phone):
     user = BotUser.objects.get(chat_id=message.chat.id)
+    usr_msg = False
+
+    if message.chat.id in user_time:
+        time_temp = time.time() - user_time[message.chat.id]['time']
+
+        if time_temp > 10:
+            usr_msg = True
+            message.text = "Нет сообщения"
+            del user_time[message.chat.id]
+        else:
+            del user_time[message.chat.id]
 
     markup, box_markup = welcome_buttons()
     markup_uz, box_markup_uz = welcome_buttons_uz()
@@ -251,6 +269,37 @@ def send_complain_text(message, user_phone):
         bot.send_message(message.from_user.id, messages_uz.help_message, parse_mode='html', reply_markup=markup_uz)
 
 
-@bot.message_handler(chat_types=['supergroup', 'group'], func=lambda message: True)
-def get_group(message: types.ChatMemberUpdated):
-    print(message.new_chat_member)
+@bot.my_chat_member_handler()
+def get_new_group(message: types.ChatMemberUpdated):
+    if message.new_chat_member.status == 'member':
+        chat_id = message.chat.id
+        chat_name = message.chat.title
+
+        if chat_name.startswith('PROWEB.'):
+            try:
+                _, course_name, language, graphic, group_time = chat_name.split(' ', 4)
+
+                if language not in ('УЗБ', 'РУС'):
+                    raise ValueError("Неверный язык. Должно быть «УЗБ» или «РУС».")
+                if not graphic.isalpha() or '-' not in graphic:
+                    raise ValueError("Недопустимая графика. Пример: «ПН-ЧТ».")
+                if not group_time.replace(':', '').isdigit():
+                    raise ValueError("Неверное время. Пример: «17:00».")
+
+                group, created = BotGroup.objects.update_or_create(
+                    chat_id=chat_id,
+                    defaults={
+                        'chat_name': chat_name,
+                        'course_name': course_name,
+                        'group_language': language,
+                        'group_graphic': graphic,
+                        'group_time': time,
+                    }
+                )
+
+                response = f"Группа {'добавлен' if created else 'обновлено'}: {chat_name}"
+                bot.send_message(chat_id, response)
+                print(response)
+
+            except ValueError as e:
+                bot.send_message(chat_id, f"Ошибка в структуре названия группы: {str(e)}")
