@@ -223,16 +223,34 @@ def send_contact(message):
     if message.from_user.id == message.contact.user_id:
         user_phone_number = message.contact.phone_number
         user_time[message.chat.id] = {'time': time.time()}
+        print(time.time())
 
         if user.language == 'ru':
             bot.send_message(message.chat.id, 'Теперь, напишите чтобы вы хотели предложить или на что жалуетесь?')
         else:
-            bot.send_message(message.chat.id, 'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?')
+            bot.send_message(message.chat.id,
+                             'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?')
 
-        bot.register_next_step_handler(message, send_complain_text, user_phone_number)
+        print(f'before going next step: {time.time()}')
+        helper(message, user_phone_number)
+
 
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста отправьте <b>СВОЙ</b> номер телефона', parse_mode='html')
+
+
+def helper(message, user_phone_number):
+    time.sleep(5)
+    bot.register_next_step_handler(message, send_complain_text, user_phone_number)
+
+
+def complain_text(message, user_phone):
+
+    bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
+                                        f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
+                                        f'Name: {message.from_user.first_name}\n'
+                                        f'Phone: {user_phone}\n'
+                                        f'Message: {message.text}')
 
 
 @bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
@@ -242,12 +260,15 @@ def send_complain_text(message, user_phone):
 
     if message.chat.id in user_time:
         time_temp = time.time() - user_time[message.chat.id]['time']
+        print(time.time())
+        print(time_temp)
 
-        if time_temp > 10:
-            usr_msg = True
+        if time_temp > 5:
             message.text = "Нет сообщения"
+            complain_text(message, user_phone)
             del user_time[message.chat.id]
         else:
+            complain_text(message, user_phone)
             del user_time[message.chat.id]
 
     markup, box_markup = welcome_buttons()
@@ -260,7 +281,9 @@ def send_complain_text(message, user_phone):
                                         f'Message: {message.text}')
 
     if user.language == 'ru':
-        bot.send_message(message.from_user.id, f"Спасибо за обращение!, {messages.text if message.content_type == 'text' else messages.phone}", reply_markup=box_markup)
+        bot.send_message(message.from_user.id,
+                         f"Спасибо за обращение!, {messages.text if message.content_type == 'text' else messages.phone}",
+                         reply_markup=box_markup)
         bot.send_message(message.from_user.id, messages.help_message, parse_mode='html', reply_markup=markup)
     else:
         bot.send_message(message.from_user.id,
