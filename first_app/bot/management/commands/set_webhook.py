@@ -10,6 +10,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         bot.set_webhook(
             WEBHOOK_URL,
-            allowed_updates=['my_chat_member']
+            allowed_updates=['my_chat_member', 'message', 'callback_query']
         )
         print('webhook set successfully')
