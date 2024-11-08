@@ -64,7 +64,7 @@ def welcome_buttons_uz():
     return markup, box_markup
 
 
-@bot.message_handler(commands=['start'], chat_types=['private'])
+@bot.message_handler(commands=['start'], chat_types=['private'], is_admin=False)
 def send_welcome(message: types.Message):
     chat_id = message.chat.id
     full_name = get_name(message)
