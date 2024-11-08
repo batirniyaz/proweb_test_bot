@@ -8,7 +8,7 @@ from .credentials import TOKEN
 
 from .bot_instance import bot
 
-from . import handlers
+from . import handlers, handlers_admin
 
 
 API_TOKEN = TOKEN
@@ -40,18 +40,3 @@ def api_bots(request: HttpRequest, token):
 
     return main_view(request)
 
-
-
-
-
-
-
-
-
-# @bot.callback_query_handler(func=lambda callback: True)
-
-
-
-# @bot.message_handler(func=lambda message: True)
-# def echo_message(message):
-#     bot.reply_to(message, message.text)
