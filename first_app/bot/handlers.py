@@ -1,4 +1,3 @@
-import threading
 import time
 
 from telebot import types
@@ -256,7 +255,6 @@ def complain_text(message, user_phone):
 @bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
 def send_complain_text(message, user_phone):
     user = BotUser.objects.get(chat_id=message.chat.id)
-    usr_msg = False
 
     if message.chat.id in user_time:
         time_temp = time.time() - user_time[message.chat.id]['time']
