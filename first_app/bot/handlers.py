@@ -147,7 +147,8 @@ def call_basic_course(callback: types.CallbackQuery):
         bsc_btn = types.InlineKeyboardButton('Записаться на базовый курс', url='t.me/proweb_basics')
         basic_course_markup.add(bsc_btn)
 
-        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html', reply_markup=basic_course_markup)
+        bot.send_message(callback.message.chat.id, messages.basic_course_message, parse_mode='html',
+                         reply_markup=basic_course_markup)
     else:
         bsc_btn = types.InlineKeyboardButton('Kompyuter asoslari kursiga yozilish', url='t.me/proweb_basics')
         basic_course_markup.add(bsc_btn)
@@ -184,9 +185,11 @@ def call_review(callback: types.CallbackQuery):
 def call_licence(callback: types.CallbackQuery):
     user = BotUser.objects.get(chat_id=callback.from_user.id)
     if user.language == 'ru':
-        bot.send_message(callback.message.chat.id, messages.licence_message, parse_mode='html', disable_web_page_preview=True)
+        bot.send_message(callback.message.chat.id, messages.licence_message, parse_mode='html',
+                         disable_web_page_preview=True)
     else:
-        bot.send_message(callback.message.chat.id, messages_uz.licence_message, parse_mode='html', disable_web_page_preview=True)
+        bot.send_message(callback.message.chat.id, messages_uz.licence_message, parse_mode='html',
+                         disable_web_page_preview=True)
 
     bot.answer_callback_query(callback_query_id=callback.id)
 
