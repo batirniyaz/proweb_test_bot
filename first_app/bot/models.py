@@ -31,4 +31,4 @@ class BotGroup(models.Model):
     group_time = models.CharField(max_length=10)
 
     def __str__(self):
-        return self.chat_id, self.chat_name, self.chat_link
+        return f'{self.chat_id}, {self.chat_name}, {self.chat_link}'
