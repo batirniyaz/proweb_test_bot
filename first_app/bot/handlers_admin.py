@@ -69,14 +69,16 @@ def on_click_admin(message: types.Message):
         admin_panel(message)
 
 
-def course_lang(message: types.Message):
+def lang_select(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    course_btn = types.KeyboardButton('Курс')
-    language_btn = types.KeyboardButton('Язык')
-    keyboard.row(course_btn, language_btn)
+    ru_btn = types.KeyboardButton('РУС')
+    uz_btn = types.KeyboardButton('УЗБ')
+    all_btn = types.KeyboardButton('Все')
+    keyboard.row(ru_btn, uz_btn)
+    keyboard.add(all_btn)
 
-    bot.send_message(message.chat.id, ' По чему фильтруем?', reply_markup=keyboard)
-    bot.register_next_step_handler(message, on_click_course_lang)
+    bot.send_message(message.chat.id, ' Язык?', reply_markup=keyboard)
+    bot.register_next_step_handler(message, lang_handle)
 
 
 @bot.message_handler(is_admin=True, func=lambda message: message.text == 'Курс' or message.text == 'Язык')
