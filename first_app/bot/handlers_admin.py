@@ -61,12 +61,10 @@ def admin_panel(message: types.Message):
 
 @bot.message_handler(is_admin=True, func=lambda message: message.text == 'Отправить' or message.text == 'Переслать')
 def on_click_admin(message: types.Message):
-    print(message.text)
-
     if message.text == 'Отправить':
-        course_lang(message)
+        lang_select(message)
     elif message.text == 'Переслать':
-        course_lang(message)
+        lang_select(message)
     else:
         admin_panel(message)
 
