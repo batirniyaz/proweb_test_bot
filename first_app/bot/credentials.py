@@ -1,6 +1,6 @@
 TOKEN = '7906298672:AAFRhFojk1xaXkwX7lyTDPk1PHXurLB97rw'
 TELEGRAM_API_URL = f'https://api.telegram.org/bot{TOKEN}'
-NGROK_URL = 'https://f7e3-192-166-230-205.ngrok-free.app'
+NGROK_URL = 'https://609e-195-158-9-110.ngrok-free.app'
 FEEDBACK_GROUP_ID = '-1002300860393'
 BOT_ID = '7906298672'
 
