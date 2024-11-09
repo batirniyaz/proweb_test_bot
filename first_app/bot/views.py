@@ -8,7 +8,7 @@ from .credentials import TOKEN
 
 from .bot_instance import bot
 
-from . import handlers, handlers_admin
+from . import handlers_admin, handlers
 
 
 API_TOKEN = TOKEN
