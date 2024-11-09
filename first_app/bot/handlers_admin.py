@@ -14,7 +14,10 @@ class IsAdmin(telebot.custom_filters.SimpleCustomFilter):
 
     @staticmethod
     def check(message: telebot.types.Message):
-        user = BotUser.objects.get(chat_id=message.chat.id)
+        try:
+            user = BotUser.objects.get(chat_id=message.chat.id)
+        except BotUser.DoesNotExist:
+            return False
         return True if user.role == 'admin' else False
 
 
