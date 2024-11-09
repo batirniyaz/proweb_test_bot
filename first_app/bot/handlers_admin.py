@@ -95,45 +95,53 @@ def lang_handle(message: types.Message):
     course_select(message, groups)
 
 
-def create_inline_kb(kbs, id_chat, lang):
+def create_inline_kb(kbs, chat_id, lang):
     keyboard = types.InlineKeyboardMarkup(row_width=2)
+
+    selected = selected_courses.get(chat_id, [])
+
     for inline in kbs:
-        text = f'✔️ {inline}' if inline in selected_courses else inline
-        print(text)
+        text = f'✔️ {inline}' if inline in selected else inline
         keyboard.add(types.InlineKeyboardButton(text, callback_data=f'select_{inline}_{lang}'))
-    keyboard.add(types.InlineKeyboardButton('All', callback_data=f'select_All_{lang}'))
+
+    all_text = '✔️ All' if 'All' in selected else 'All'
+    keyboard.add(types.InlineKeyboardButton(all_text, callback_data=f'select_All_{lang}'))
     keyboard.add(types.InlineKeyboardButton('✅ Подтвердить', callback_data='confirm'))
-    bot.send_message(id_chat, 'Выбирайте', reply_markup=keyboard)
 
-
-def course_select(message: types.Message, groups):
-    group_filter_by_course = set()
-
-    for group in groups:
-        if group.course_name not in group_filter_by_course:
-            group_filter_by_course.add(group.course_name)
-    create_inline_kb(group_filter_by_course, message.chat.id, message.text)
+    return keyboard
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('select_') or call.data == 'confirm')
 def multiple_selection(call: types.CallbackQuery):
     chat_id = call.message.chat.id
+    selected = selected_courses.setdefault(chat_id, [])
 
     if call.data != 'confirm':
         msg = call.data[7:]
         course, lang = msg.split('_', 2)
 
-        if chat_id not in selected_courses:
-            selected_courses[chat_id] = []
-        if course in selected_courses[chat_id]:
-            selected_courses[chat_id].remove(course)
+        if course == 'All':
+            if 'All' in selected:
+                selected.clear()
+            else:
+                selected.clear()
+                selected.append('All')
         else:
-            selected_courses[chat_id].append(course)
+            if 'All' in selected:
+                selected.remove('All')
 
-        print(selected_courses)
+            if course in selected:
+                selected.remove(course)
+            else:
+                selected.append(course)
+
+        all_groups = set(group.course_name for group in BotGroup.objects.filter(group_language=lang))
+        keyboard = create_inline_kb(all_groups, chat_id, lang)
+        bot.edit_message_reply_markup(chat_id=chat_id, message_id=call.message.message_id, reply_markup=keyboard)
+
     else:
-        if 'All' in selected_courses[chat_id]:
-            selected_courses[chat_id] = ['All']
+        if 'All' in selected:
+            # selected_courses[chat_id] = ['All']
             bot.send_message(chat_id, f'Принял ваш запрос. Что вы хотите отправить во все группы')
         else:
             bot.send_message(chat_id, f'Принял ваш запрос. Что вы хотите отправить в группу(ы) {", ".join(selected_courses[chat_id])}')
@@ -142,6 +150,13 @@ def multiple_selection(call: types.CallbackQuery):
         bot.register_next_step_handler(call.message, get_messages)
 
     bot.answer_callback_query(callback_query_id=call.id)
+
+
+def course_select(message: types.Message, groups):
+    group_filter_by_course = set(group.course_name for group in groups)
+    keyboard = create_inline_kb(group_filter_by_course, message.chat.id, message.text)
+
+    bot.send_message(message.chat.id, 'Выберите курс', reply_markup=keyboard)
 
 
 @bot.message_handler(is_admin=True, content_types=['text', 'audio', 'video', 'image', 'photo', 'voice', 'document'], func=lambda message: True)
