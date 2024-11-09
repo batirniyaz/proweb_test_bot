@@ -1,4 +1,5 @@
 import time
+from threading import Timer
 
 from telebot import types
 
@@ -230,44 +231,23 @@ def send_contact(message):
             bot.send_message(message.chat.id,
                              'Endi nima taklif qilmoqchisiz yoki nimadan shikoyat qilayotganingizni yozing?')
 
-        print(f'before going next step: {time.time()}')
-        helper(message, user_phone_number)
+        timer = Timer(1800, complain_text, args=[message, user_phone_number, 'Netu'])
+        user_time[message.chat.id]['timer'] = timer
+        timer.start()
 
-
+        bot.register_next_step_handler(message, send_complain_text, user_phone_number)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста отправьте <b>СВОЙ</b> номер телефона', parse_mode='html')
 
 
-def helper(message, user_phone_number):
-    time.sleep(5)
-    bot.register_next_step_handler(message, send_complain_text, user_phone_number)
-
-
-def complain_text(message, user_phone):
+def complain_text(message, user_phone, text=None):
+    user = BotUser.objects.get(chat_id=message.chat.id)
 
     bot.send_message(FEEDBACK_GROUP_ID, f'User id: {message.from_user.id}\n'
                                         f'User: @{message.from_user.username if message.from_user.username else "Нету"}\n'
                                         f'Name: {message.from_user.first_name}\n'
                                         f'Phone: {user_phone}\n'
-                                        f'Message: {message.text}')
-
-
-@bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
-def send_complain_text(message, user_phone):
-    user = BotUser.objects.get(chat_id=message.chat.id)
-
-    if message.chat.id in user_time:
-        time_temp = time.time() - user_time[message.chat.id]['time']
-        print(time.time())
-        print(time_temp)
-
-        if time_temp > 5:
-            message.text = "Нет сообщения"
-            complain_text(message, user_phone)
-            del user_time[message.chat.id]
-        else:
-            complain_text(message, user_phone)
-            del user_time[message.chat.id]
+                                        f'Message: {message.text if not text else text}')
 
     markup, box_markup = welcome_buttons()
     markup_uz, box_markup_uz = welcome_buttons_uz()
@@ -282,6 +262,19 @@ def send_complain_text(message, user_phone):
                          f"Murojaat qilganingiz uchun tashakkur!, {messages_uz.text if message.content_type == 'text' else messages_uz.phone}",
                          reply_markup=box_markup_uz)
         bot.send_message(message.from_user.id, messages_uz.help_message, parse_mode='html', reply_markup=markup_uz)
+
+
+@bot.message_handler(content_types=['text'], func=lambda message: True, chat_types=['private'])
+def send_complain_text(message, user_phone):
+
+    if message.chat.id in user_time:
+        timer = user_time[message.chat.id].get('timer')
+        if timer:
+            timer.cancel()
+
+        del user_time[message.chat.id]
+
+        complain_text(message, user_phone)
 
 
 @bot.my_chat_member_handler()
@@ -327,7 +320,7 @@ def get_new_group(message: types.ChatMemberUpdated):
         if group:
             group.delete()
             print("Delete")
-            bot.send_message(message.from_user.id, f'Бот был исключен из группы: {chat_name}. И я удалил его id {chat_id} из БД')
+            bot.send_message(message.from_user.id,
+                             f'Бот был исключен из группы: {chat_name}. И я удалил его id {chat_id} из БД')
         else:
             print("no bot")
-
