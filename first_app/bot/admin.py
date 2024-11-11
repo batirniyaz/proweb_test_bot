@@ -14,10 +14,9 @@ class BotUserAdmin(admin.ModelAdmin):
     actions = ['make_admin', 'unmake_admin', 'delete_users']
 
     def make_admin(self, request, queryset):
-        queryset.update(role='admin')
         for user in queryset:
             send_admin_conf(user.chat_id)
-        self.message_user(request, 'выбранные пользователи поднялись до админки')
+        self.message_user(request, 'выбранные пользователи получили запрос на админство')
 
     make_admin.short_description = 'Сделать админом'
 
