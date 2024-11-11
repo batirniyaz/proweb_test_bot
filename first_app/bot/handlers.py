@@ -3,7 +3,6 @@ from threading import Timer
 
 from telebot import types
 
-from .handlers_admin import admin_panel
 from .messages import messages, messages_uz
 
 from .credentials import FEEDBACK_GROUP_ID, BOT_ID
@@ -68,6 +67,10 @@ def welcome_buttons_uz():
 def send_welcome(message: types.Message):
     chat_id = message.chat.id
     full_name = get_name(message)
+
+    bot.clear_step_handler_by_chat_id(chat_id)
+    if message.message_id > 2:
+        bot.delete_message(chat_id, message.message_id - 1)
 
     user = BotUser.objects.filter(chat_id=chat_id).first()
 
